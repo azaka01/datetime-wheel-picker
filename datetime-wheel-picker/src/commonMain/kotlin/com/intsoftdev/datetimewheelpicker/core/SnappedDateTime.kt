@@ -1,4 +1,4 @@
-package dev.darkokoa.datetimewheelpicker.core
+package com.intsoftdev.datetimewheelpicker.core
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime

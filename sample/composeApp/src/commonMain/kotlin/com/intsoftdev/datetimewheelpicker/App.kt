@@ -1,4 +1,4 @@
-package dev.darkokoa.datetimewheelpicker
+package com.intsoftdev.datetimewheelpicker
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -15,9 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import dev.darkokoa.datetimewheelpicker.core.TimeFormat
-import dev.darkokoa.datetimewheelpicker.core.WheelPickerDefaults
-import dev.darkokoa.datetimewheelpicker.theme.AppTheme
+import com.intsoftdev.datetimewheelpicker.core.TimeFormat
+import com.intsoftdev.datetimewheelpicker.core.WheelPickerDefaults
+import com.intsoftdev.datetimewheelpicker.theme.AppTheme
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone

@@ -91,14 +91,14 @@ kotlin {
 }
 
 android {
-  namespace = "dev.darkokoa.datetimewheelpicker"
+  namespace = "com.intsoftdev.datetimewheelpicker"
   compileSdk = 34
 
   defaultConfig {
     minSdk = 24
     targetSdk = 34
 
-    applicationId = "dev.darkokoa.datetimewheelpicker.androidApp"
+    applicationId = "com.intsoftdev.datetimewheelpicker.androidApp"
     versionCode = 1
     versionName = "1.0.0"
   }
@@ -119,7 +119,7 @@ compose.desktop {
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-      packageName = "dev.darkokoa.datetimewheelpicker.desktopApp"
+      packageName = "com.intsoftdev.datetimewheelpicker.desktopApp"
       packageVersion = "1.0.0"
     }
   }

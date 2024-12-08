@@ -1,4 +1,4 @@
-package dev.darkokoa.datetimewheelpicker
+package com.intsoftdev.datetimewheelpicker
 
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -8,12 +8,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import dev.darkokoa.datetimewheelpicker.core.CYB3R_1N1T_ZOLL
-import dev.darkokoa.datetimewheelpicker.core.DefaultWheelDatePicker
-import dev.darkokoa.datetimewheelpicker.core.EPOCH
-import dev.darkokoa.datetimewheelpicker.core.SelectorProperties
-import dev.darkokoa.datetimewheelpicker.core.WheelPickerDefaults
-import dev.darkokoa.datetimewheelpicker.core.now
+import com.intsoftdev.datetimewheelpicker.core.CYB3R_1N1T_ZOLL
+import com.intsoftdev.datetimewheelpicker.core.DefaultWheelDatePicker
+import com.intsoftdev.datetimewheelpicker.core.EPOCH
+import com.intsoftdev.datetimewheelpicker.core.SelectorProperties
+import com.intsoftdev.datetimewheelpicker.core.WheelPickerDefaults
+import com.intsoftdev.datetimewheelpicker.core.now
 import kotlinx.datetime.LocalDate
 
 @Composable

@@ -1,4 +1,4 @@
-package dev.darkokoa.datetimewheelpicker.core
+package com.intsoftdev.datetimewheelpicker.core
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
