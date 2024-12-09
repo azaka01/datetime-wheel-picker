@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
-    alias(libs.plugins.multiplatform)
-    alias(libs.plugins.compose)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.maven.publish)
+    alias(isdlibs.plugins.kotlinMultiplatform)
+    alias(isdlibs.plugins.composeMultiplatform)
+    alias(isdlibs.plugins.compose.compiler)
+    alias(isdlibs.plugins.androidLibrary)
+    alias(isdlibs.plugins.maven.publish)
 }
 
 kotlin {
@@ -58,7 +58,7 @@ kotlin {
             implementation(compose.material3)
 //      @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 //      implementation(compose.components.resources)
-            implementation(libs.kotlinx.datetime)
+            implementation(isdlibs.kotlinx.dateTime)
         }
 
         commonTest.dependencies {

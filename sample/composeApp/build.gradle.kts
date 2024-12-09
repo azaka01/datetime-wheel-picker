@@ -2,10 +2,10 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  alias(libs.plugins.multiplatform)
-  alias(libs.plugins.compose)
-  alias(libs.plugins.compose.compiler)
-  alias(libs.plugins.android.application)
+  alias(isdlibs.plugins.kotlinMultiplatform)
+  alias(isdlibs.plugins.composeMultiplatform)
+  alias(isdlibs.plugins.compose.compiler)
+  alias(isdlibs.plugins.androidApplication)
 }
 
 kotlin {
@@ -61,7 +61,7 @@ kotlin {
       implementation(compose.material3)
 //      @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 //      implementation(compose.components.resources)
-      implementation(libs.kotlinx.datetime)
+      implementation(isdlibs.kotlinx.dateTime)
     }
 
     commonTest.dependencies {
@@ -69,7 +69,7 @@ kotlin {
     }
 
     androidMain.dependencies {
-      implementation(libs.androidx.activityCompose)
+      implementation(isdlibs.androidx.compose.activity)
     }
 
     jvmMain.dependencies {
