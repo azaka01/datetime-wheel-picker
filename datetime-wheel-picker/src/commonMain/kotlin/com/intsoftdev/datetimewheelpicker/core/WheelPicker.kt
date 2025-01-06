@@ -20,176 +20,206 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import io.github.aakira.napier.Napier
 import kotlin.math.abs
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun WheelPicker(
-  modifier: Modifier = Modifier,
-  startIndex: Int = 0,
-  count: Int,
-  rowCount: Int,
-  size: DpSize = DpSize(128.dp, 128.dp),
-  selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
-  onScrollFinished: (snappedIndex: Int) -> Int? = { null },
-  content: @Composable LazyItemScope.(index: Int) -> Unit,
+    modifier: Modifier = Modifier,
+    startIndex: Int = 0,
+    count: Int,
+    rowCount: Int,
+    itemCount: Int?= null,
+    size: DpSize = DpSize(128.dp, 128.dp),
+    selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
+    onScrollFinished: (snappedIndex: Int) -> Int? = { null },
+    content: @Composable LazyItemScope.(index: Int) -> Unit,
 ) {
-  val lazyListState = rememberLazyListState(startIndex)
-  val flingBehavior = rememberSnapFlingBehavior(lazyListState)
-  val isScrollInProgress = lazyListState.isScrollInProgress
+    val lazyListState = rememberLazyListState(startIndex)
+    val flingBehavior = rememberSnapFlingBehavior(lazyListState)
+    val isScrollInProgress = lazyListState.isScrollInProgress
 
-  LaunchedEffect(isScrollInProgress, count) {
-    if (!isScrollInProgress) {
-      onScrollFinished(calculateSnappedItemIndex(lazyListState))?.let {
-        lazyListState.scrollToItem(it)
-      }
-    }
-  }
-
-  Box(
-    modifier = modifier,
-    contentAlignment = Alignment.Center
-  ) {
-    if (selectorProperties.enabled().value) {
-      Surface(
-        modifier = Modifier
-          .size(size.width, size.height / rowCount),
-        shape = selectorProperties.shape().value,
-        color = selectorProperties.color().value,
-        border = selectorProperties.border().value
-      ) {}
-    }
-    LazyColumn(
-      modifier = Modifier
-        .height(size.height)
-        .width(size.width),
-      state = lazyListState,
-      contentPadding = PaddingValues(vertical = size.height / rowCount * ((rowCount - 1) / 2)),
-      flingBehavior = flingBehavior
-    ) {
-      items(count) { index ->
-        val (newAlpha, newRotationX) = calculateAnimatedAlphaAndRotationX(
-          lazyListState = lazyListState,
-          index = index,
-          rowCount = rowCount
-        )
-
-        Box(
-          modifier = Modifier
-            .height(size.height / rowCount)
-            .width(size.width)
-            .alpha(newAlpha)
-            .graphicsLayer {
-              rotationX = newRotationX
-            },
-          contentAlignment = Alignment.Center
-        ) {
-          content(index)
+    LaunchedEffect(isScrollInProgress, count) {
+        if (!isScrollInProgress) {
+            val snappedItemIndex = calculateSnappedItemIndex(lazyListState)
+            Napier.d(
+                tag = "WheelPicker",
+                message = "onScrollFinished shouldLog snappedIndex:$snappedItemIndex"
+            )
+            onScrollFinished(snappedItemIndex)?.let {
+                var scrollItem = it
+                if (itemCount !=null && snappedItemIndex < itemCount) {
+                    scrollItem = snappedItemIndex + itemCount
+                }
+                Napier.d(tag = "WheelPicker", message = "onScrollFinished snappedIndex: $it, rowCount: $rowCount count:$count")
+                if (itemCount !=null && scrollItem < itemCount) {
+                    var itemToScroll = scrollItem + itemCount
+                    Napier.d(tag = "WheelPicker", message = "scrollToItem: $itemToScroll")
+                    lazyListState.scrollToItem(scrollItem + itemCount)
+                } else {
+                    lazyListState.scrollToItem(scrollItem)
+                }
+            }
         }
-      }
     }
-  }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        if (selectorProperties.enabled().value) {
+            Surface(
+                modifier = Modifier
+                    .size(size.width, size.height / rowCount),
+                shape = selectorProperties.shape().value,
+                color = selectorProperties.color().value,
+                border = selectorProperties.border().value
+            ) {}
+        }
+        LazyColumn(
+            modifier = Modifier
+                .height(size.height)
+                .width(size.width),
+            state = lazyListState,
+            contentPadding = PaddingValues(vertical = size.height / rowCount * ((rowCount - 1) / 2)),
+            flingBehavior = flingBehavior
+        ) {
+            items(if (itemCount !=null) Int.MAX_VALUE else count) { index ->
+                val (newAlpha, newRotationX) = calculateAnimatedAlphaAndRotationX(
+                    lazyListState = lazyListState,
+                    index = index,
+                    rowCount = rowCount
+                )
+
+                Napier.d(tag = "WheelPicker", message = "count: $count, rowCount: $rowCount index:$index, alpha: $newAlpha")
+
+                Box(
+                    modifier = Modifier
+                        .height(size.height / rowCount)
+                        .width(size.width)
+                        .alpha(newAlpha)
+                        .graphicsLayer {
+                            rotationX = newRotationX
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Napier.d(tag = "WheelPicker", message = "content index:$index")
+
+                    content(index)
+                }
+            }
+        }
+    }
 }
 
 private fun calculateSnappedItemIndex(lazyListState: LazyListState): Int {
-  val currentItemIndex = lazyListState.firstVisibleItemIndex
-  val itemCount = lazyListState.layoutInfo.totalItemsCount
-  val offset = lazyListState.firstVisibleItemScrollOffset
-  val itemHeight = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.size ?: return currentItemIndex
+    val currentItem = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()
+    val currentItemIndex = lazyListState.firstVisibleItemIndex
+    Napier.d(tag = "WheelPicker", message = "currentItemIndex $currentItemIndex")
+    Napier.d(tag = "WheelPicker", message = "currentItem index ${currentItem?.index}")
+    Napier.d(tag = "WheelPicker", message = "currentItem offset ${currentItem?.offset}")
+    Napier.d(tag = "WheelPicker", message = "currentItem size ${currentItem?.size}")
+    val itemCount = lazyListState.layoutInfo.totalItemsCount
+    val offset = lazyListState.firstVisibleItemScrollOffset
+    val itemHeight = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()?.size ?: return currentItemIndex
 
-  return if (offset > itemHeight / 2 && currentItemIndex < itemCount - 1) {
-    currentItemIndex + 1
-  } else {
-    currentItemIndex
-  }
+    return if (offset > itemHeight / 2 && currentItemIndex < itemCount - 1) {
+        Napier.d(tag = "WheelPicker", message = "return ${(currentItemIndex + 1)}")
+        currentItemIndex + 1
+    } else {
+        Napier.d(tag = "WheelPicker", message = "return $currentItemIndex")
+        currentItemIndex
+    }
 }
 
 @Composable
 private fun calculateAnimatedAlphaAndRotationX(
-  lazyListState: LazyListState,
-  index: Int,
-  rowCount: Int
+    lazyListState: LazyListState,
+    index: Int,
+    rowCount: Int
 ): Pair<Float, Float> {
 
-  val layoutInfo = remember { derivedStateOf { lazyListState.layoutInfo } }.value
-  val viewPortHeight = layoutInfo.viewportSize.height.toFloat()
-  val singleViewPortHeight = viewPortHeight / rowCount
+    val layoutInfo = remember { derivedStateOf { lazyListState.layoutInfo } }.value
+    val viewPortHeight = layoutInfo.viewportSize.height.toFloat()
+    val singleViewPortHeight = viewPortHeight / rowCount
 
-  val centerIndex = remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }.value
-  val centerIndexOffset = remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }.value
+    val centerIndex = remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }.value
+    val centerIndexOffset = remember { derivedStateOf { lazyListState.firstVisibleItemScrollOffset } }.value
 
-  val distanceToCenterIndex = index - centerIndex
+    val distanceToCenterIndex = index - centerIndex
 
-  val distanceToIndexSnap = distanceToCenterIndex * singleViewPortHeight.toInt() - centerIndexOffset
-  val distanceToIndexSnapAbs = abs(distanceToIndexSnap)
+    val distanceToIndexSnap = distanceToCenterIndex * singleViewPortHeight.toInt() - centerIndexOffset
+    val distanceToIndexSnapAbs = abs(distanceToIndexSnap)
 
-  val animatedAlpha = if (abs(distanceToIndexSnap) in 0..singleViewPortHeight.toInt()) {
-    1.2f - (distanceToIndexSnapAbs / singleViewPortHeight)
-  } else {
-    0.2f
-  }
+    val animatedAlpha = if (abs(distanceToIndexSnap) in 0..singleViewPortHeight.toInt()) {
+        1.2f - (distanceToIndexSnapAbs / singleViewPortHeight)
+    } else {
+        0.2f
+    }
 
-  val animatedRotationX = (-20 * (distanceToIndexSnap / singleViewPortHeight)).takeUnless { it.isNaN() } ?: 0f
+    val animatedRotationX = (-20 * (distanceToIndexSnap / singleViewPortHeight)).takeUnless { it.isNaN() } ?: 0f
 
-  return animatedAlpha to animatedRotationX
+    return animatedAlpha to animatedRotationX
 }
 
 object WheelPickerDefaults {
-  @Composable
-  fun selectorProperties(
-    enabled: Boolean = true,
-    shape: Shape = RoundedCornerShape(16.dp),
-    color: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-    border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
-  ): SelectorProperties = DefaultSelectorProperties(
-    enabled = enabled,
-    shape = shape,
-    color = color,
-    border = border
-  )
+    @Composable
+    fun selectorProperties(
+        enabled: Boolean = true,
+        shape: Shape = RoundedCornerShape(16.dp),
+        color: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+        border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+    ): SelectorProperties = DefaultSelectorProperties(
+        enabled = enabled,
+        shape = shape,
+        color = color,
+        border = border
+    )
 }
 
 interface SelectorProperties {
-  @Composable
-  fun enabled(): State<Boolean>
+    @Composable
+    fun enabled(): State<Boolean>
 
-  @Composable
-  fun shape(): State<Shape>
+    @Composable
+    fun shape(): State<Shape>
 
-  @Composable
-  fun color(): State<Color>
+    @Composable
+    fun color(): State<Color>
 
-  @Composable
-  fun border(): State<BorderStroke?>
+    @Composable
+    fun border(): State<BorderStroke?>
 }
 
 @Immutable
 internal class DefaultSelectorProperties(
-  private val enabled: Boolean,
-  private val shape: Shape,
-  private val color: Color,
-  private val border: BorderStroke?
+    private val enabled: Boolean,
+    private val shape: Shape,
+    private val color: Color,
+    private val border: BorderStroke?
 ) : SelectorProperties {
 
-  @Composable
-  override fun enabled(): State<Boolean> {
-    return rememberUpdatedState(enabled)
-  }
+    @Composable
+    override fun enabled(): State<Boolean> {
+        return rememberUpdatedState(enabled)
+    }
 
-  @Composable
-  override fun shape(): State<Shape> {
-    return rememberUpdatedState(shape)
-  }
+    @Composable
+    override fun shape(): State<Shape> {
+        return rememberUpdatedState(shape)
+    }
 
-  @Composable
-  override fun color(): State<Color> {
-    return rememberUpdatedState(color)
-  }
+    @Composable
+    override fun color(): State<Color> {
+        return rememberUpdatedState(color)
+    }
 
-  @Composable
-  override fun border(): State<BorderStroke?> {
-    return rememberUpdatedState(border)
-  }
+    @Composable
+    override fun border(): State<BorderStroke?> {
+        return rememberUpdatedState(border)
+    }
 }
 
 

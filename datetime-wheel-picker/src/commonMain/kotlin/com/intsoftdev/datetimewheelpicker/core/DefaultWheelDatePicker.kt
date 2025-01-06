@@ -6,305 +6,177 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import io.github.aakira.napier.Napier
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
-import kotlinx.datetime.number
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 internal fun DefaultWheelDatePicker(
-  modifier: Modifier = Modifier,
-  startDate: LocalDate = LocalDate.now(),
-  minDate: LocalDate = LocalDate.EPOCH,
-  maxDate: LocalDate = LocalDate.CYB3R_1N1T_ZOLL,
-  yearsRange: IntRange? = IntRange(minDate.year, maxDate.year),
-  size: DpSize = DpSize(256.dp, 128.dp),
-  rowCount: Int = 3,
-  textStyle: TextStyle = MaterialTheme.typography.titleMedium,
-  textColor: Color = LocalContentColor.current,
-  selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
-  onSnappedDate: (snappedDate: SnappedDate) -> Int? = { _ -> null }
+    modifier: Modifier = Modifier,
+    startDate: LocalDate = LocalDate.now(),
+    datesRange: ClosedRange<LocalDate>,
+    size: DpSize = DpSize(256.dp, 128.dp),
+    rowCount: Int = 3,
+    textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+    textColor: Color = LocalContentColor.current,
+    selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
+    onSnappedDate: (snappedDate: SnappedDate) -> Int? = { _ -> null }
 ) {
-  val itemCount = if (yearsRange == null) 2 else 3
-  val itemWidth = size.width / itemCount
+    val itemCount = 1
+    val itemWidth = size.width / itemCount
 
-  var snappedDate by remember { mutableStateOf(startDate) }
+    var snappedDate by remember { mutableStateOf(startDate) }
 
-  var dayOfMonths = calculateDayOfMonths(snappedDate.month.number, snappedDate.year)
+    var daysToDisplay = getDatesAroundCurrent(datesRange)
 
-  val months = (1..12).map {
-    val monthName = Month(it).name.lowercase().replaceFirstChar { char -> char.titlecase() }
-
-    Month(
-      text = if (size.width / 3 < 55.dp) {
-        monthName.substring(0, 3)
-      } else monthName,
-      value = it,
-      index = it - 1
-    )
-  }
-
-  val years = yearsRange?.map {
-    Year(
-      text = it.toString(),
-      value = it,
-      index = yearsRange.indexOf(it)
-    )
-  }
-
-  Box(modifier = modifier, contentAlignment = Alignment.Center) {
-    if (selectorProperties.enabled().value) {
-      Surface(
-        modifier = Modifier
-          .size(size.width, size.height / rowCount),
-        shape = selectorProperties.shape().value,
-        color = selectorProperties.color().value,
-        border = selectorProperties.border().value
-      ) {}
-    }
-    Row {
-      //Day of Month
-      WheelTextPicker(
-        size = DpSize(
-          width = itemWidth,
-          height = size.height
-        ),
-        texts = dayOfMonths.map { it.text },
-        rowCount = rowCount,
-        style = textStyle,
-        color = textColor,
-        selectorProperties = WheelPickerDefaults.selectorProperties(
-          enabled = false
-        ),
-        startIndex = dayOfMonths.find { it.value == startDate.dayOfMonth }?.index ?: 0,
-        onScrollFinished = { snappedIndex ->
-
-          val newDayOfMonth = dayOfMonths.find { it.index == snappedIndex }?.value
-
-          newDayOfMonth?.let {
-            val newDate = snappedDate.withDayOfMonth(newDayOfMonth)
-
-            if (!newDate.isBefore(minDate) && !newDate.isAfter(maxDate)) {
-              snappedDate = newDate
-            }
-
-            val newIndex = dayOfMonths.find { it.value == snappedDate.dayOfMonth }?.index
-
-            newIndex?.let {
-              onSnappedDate(
-                SnappedDate.DayOfMonth(
-                  localDate = snappedDate,
-                  index = newIndex
-                )
-              )?.let { return@WheelTextPicker it }
-            }
-          }
-
-          return@WheelTextPicker dayOfMonths.find { it.value == snappedDate.dayOfMonth }?.index
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        if (selectorProperties.enabled().value) {
+            Surface(
+                modifier = Modifier
+                    .size(size.width, size.height / rowCount),
+                shape = selectorProperties.shape().value,
+                color = selectorProperties.color().value,
+                border = selectorProperties.border().value
+            ) {}
         }
-      )
-      //Month
-      WheelTextPicker(
-        size = DpSize(
-          width = itemWidth,
-          height = size.height
-        ),
-        texts = months.map { it.text },
-        rowCount = rowCount,
-        style = textStyle,
-        color = textColor,
-        selectorProperties = WheelPickerDefaults.selectorProperties(
-          enabled = false
-        ),
-        startIndex = months.find { it.value == startDate.monthNumber }?.index ?: 0,
-        onScrollFinished = { snappedIndex ->
+        Row {
+            //Day of Month
+            WheelTextPicker(
+                size = DpSize(
+                    width = itemWidth,
+                    height = size.height
+                ),
+                texts = daysToDisplay.map {
+                    it.localDate.toDisplayable()
+                    // newDate.dayOfWeek.name.substring(0,3) + " " + it.text + " " +  newDate.month.name.substring(0,3)
+                },
+                rowCount = rowCount,
+                itemCount = null,
+                style = textStyle,
+                color = textColor,
+                selectorProperties = WheelPickerDefaults.selectorProperties(
+                    enabled = false
+                ),
+                startIndex = daysToDisplay.find { it.localDate == startDate }?.index ?: 0,
+                onScrollFinished = { snappedIndex ->
 
-          val newMonth = months.find { it.index == snappedIndex }?.value
+                    Napier.d(
+                        tag = "WheelTextPicker",
+                        message = "onScrollFinished snappedIndex: $snappedIndex"
+                    )
+                    val newDate = daysToDisplay.find { it.index == snappedIndex }?.localDate
 
-          newMonth?.let {
+                    newDate?.let {
+                        Napier.d(tag = "WheelTextPicker", message = "newDate: $newDate")
 
-            val newDate = snappedDate.withMonthNumber(newMonth)
+                        if (newDate in datesRange) {
+                            Napier.d(tag = "WheelTextPicker", message = "NEW snappedDate: $newDate")
+                            snappedDate = newDate
+                        } else {
+                            Napier.d(tag = "WheelTextPicker", message = "IGNORE out of range")
+                        }
 
-            if (!newDate.isBefore(minDate) && !newDate.isAfter(maxDate)) {
-              snappedDate = newDate
-            }
+                        val newIndex = daysToDisplay.find { it.localDate == snappedDate }?.index
 
-            dayOfMonths = calculateDayOfMonths(snappedDate.month.number, snappedDate.year)
+                        newIndex?.let {
+                            Napier.d(tag = "WheelTextPicker", message = "newIndex: $newIndex")
 
-            val newIndex = months.find { it.value == snappedDate.monthNumber }?.index
+                            onSnappedDate(
+                                SnappedDate.NewDate(
+                                    localDate = snappedDate,
+                                    index = newIndex
+                                )
+                            )?.let { return@WheelTextPicker it }
+                        }
+                    }
 
-            newIndex?.let {
-              onSnappedDate(
-                SnappedDate.Month(
-                  localDate = snappedDate,
-                  index = newIndex
-                )
-              )?.let { return@WheelTextPicker it }
-            }
-          }
+                    return@WheelTextPicker daysToDisplay.find { it.localDate == snappedDate }?.index
+                }
+            )
 
-
-          return@WheelTextPicker months.find { it.value == snappedDate.monthNumber }?.index
+            /**
+             * To make the UI compact and consistent with iOS, the month and year fields
+             * have been removed. They can be reintroduced as a configuration option if needed.
+             */
         }
-      )
-      //Year
-      years?.let { years ->
-        WheelTextPicker(
-          size = DpSize(
-            width = itemWidth,
-            height = size.height
-          ),
-          texts = years.map { it.text },
-          rowCount = rowCount,
-          style = textStyle,
-          color = textColor,
-          selectorProperties = WheelPickerDefaults.selectorProperties(
-            enabled = false
-          ),
-          startIndex = years.find { it.value == startDate.year }?.index ?: 0,
-          onScrollFinished = { snappedIndex ->
-
-            val newYear = years.find { it.index == snappedIndex }?.value
-
-            newYear?.let {
-
-              val newDate = snappedDate.withYear(newYear)
-
-              if (!newDate.isBefore(minDate) && !newDate.isAfter(maxDate)) {
-                snappedDate = newDate
-              }
-
-              dayOfMonths = calculateDayOfMonths(snappedDate.month.number, snappedDate.year)
-
-              val newIndex = years.find { it.value == snappedDate.year }?.index
-
-              newIndex?.let {
-                onSnappedDate(
-                  SnappedDate.Year(
-                    localDate = snappedDate,
-                    index = newIndex
-                  )
-                )?.let { return@WheelTextPicker it }
-
-              }
-            }
-
-            return@WheelTextPicker years.find { it.value == snappedDate.year }?.index
-          }
-        )
-      }
     }
-  }
 }
 
 internal data class DayOfMonth(
-  val text: String,
-  val value: Int,
-  val index: Int
+    val text: String,
+    val value: Int,
+    val index: Int
 )
 
 private data class Month(
-  val text: String,
-  val value: Int,
-  val index: Int
+    val text: String,
+    val value: Int,
+    val index: Int
 )
 
 private data class Year(
-  val text: String,
-  val value: Int,
-  val index: Int
+    val text: String,
+    val value: Int,
+    val index: Int
 )
 
-internal fun calculateDayOfMonths(month: Int, year: Int): List<DayOfMonth> {
+internal data class DateSelectionElement(
+    val text: String,
+    val localDate: LocalDate,
+    val index: Int
+)
 
-  val isLeapYear = LocalDate(year, month, 1).isLeapYear
+fun LocalDate.toDisplayable(): String {
+    return this.toDayOfWeekText() + " " + "${this.dayOfMonth}" + " " + this.month.name.lowercase()
+        .replaceFirstChar { char -> char.titlecase() }.subSequence(0, 3)
+}
 
-  val month31day = (1..31).map {
-    DayOfMonth(
-      text = it.toString(),
-      value = it,
-      index = it - 1
-    )
-  }
-  val month30day = (1..30).map {
-    DayOfMonth(
-      text = it.toString(),
-      value = it,
-      index = it - 1
-    )
-  }
-  val month29day = (1..29).map {
-    DayOfMonth(
-      text = it.toString(),
-      value = it,
-      index = it - 1
-    )
-  }
-  val month28day = (1..28).map {
-    DayOfMonth(
-      text = it.toString(),
-      value = it,
-      index = it - 1
-    )
-  }
+internal fun getDatesAroundCurrent(datesRange: ClosedRange<LocalDate>): List<DateSelectionElement> {
 
-  return when (month) {
-    1 -> {
-      month31day
+    val currentDate: LocalDate =
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+    val newStartDate = datesRange.start.minus(1, DateTimeUnit.DAY)
+    val newDatesRange = newStartDate..datesRange.endInclusive
+
+    return newDatesRange.toList().mapIndexed { index, localDate ->
+        DateSelectionElement(
+            text = localDate.toDisplayable(),
+            localDate = localDate,
+            index = index
+        ).also {
+            Napier.d(
+                tag = "getDatesAroundCurrent",
+                message = "text: ${it.text}, index: ${it.index}"
+            )
+        }
     }
+}
 
-    2 -> {
-      if (isLeapYear) month29day else month28day
+// Extension function to convert ClosedRange to List
+fun ClosedRange<LocalDate>.toList(): List<LocalDate> {
+    val dates = mutableListOf<LocalDate>()
+    var tempDate = this.start
+    while (tempDate <= this.endInclusive) {
+        dates.add(tempDate)
+        tempDate = tempDate.plus(DatePeriod(days = 1))
     }
-
-    3 -> {
-      month31day
-    }
-
-    4 -> {
-      month30day
-    }
-
-    5 -> {
-      month31day
-    }
-
-    6 -> {
-      month30day
-    }
-
-    7 -> {
-      month31day
-    }
-
-    8 -> {
-      month31day
-    }
-
-    9 -> {
-      month30day
-    }
-
-    10 -> {
-      month31day
-    }
-
-    11 -> {
-      month30day
-    }
-
-    12 -> {
-      month31day
-    }
-
-    else -> {
-      emptyList()
-    }
-  }
+    return dates
 }

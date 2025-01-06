@@ -6,6 +6,7 @@ import kotlinx.datetime.LocalTime
 
 
 internal sealed class SnappedDateTime(val snappedLocalDateTime: LocalDateTime, val snappedIndex: Int) {
+  data class NewDate(val localDateTime: LocalDateTime, val index: Int) : SnappedDateTime(localDateTime, index)
   data class DayOfMonth(val localDateTime: LocalDateTime, val index: Int) : SnappedDateTime(localDateTime, index)
   data class Month(val localDateTime: LocalDateTime, val index: Int) : SnappedDateTime(localDateTime, index)
   data class Year(val localDateTime: LocalDateTime, val index: Int) : SnappedDateTime(localDateTime, index)
@@ -14,9 +15,9 @@ internal sealed class SnappedDateTime(val snappedLocalDateTime: LocalDateTime, v
 }
 
 internal sealed class SnappedDate(val snappedLocalDate: LocalDate, val snappedIndex: Int) {
+  data class NewDate(val localDate: LocalDate, val index: Int) : SnappedDate(localDate, index)
   data class DayOfMonth(val localDate: LocalDate, val index: Int) : SnappedDate(localDate, index)
   data class Month(val localDate: LocalDate, val index: Int) : SnappedDate(localDate, index)
-  data class Year(val localDate: LocalDate, val index: Int) : SnappedDate(localDate, index)
 }
 
 internal sealed class SnappedTime(val snappedLocalTime: LocalTime, val snappedIndex: Int) {

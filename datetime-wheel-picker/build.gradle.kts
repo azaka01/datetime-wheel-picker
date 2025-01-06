@@ -59,6 +59,7 @@ kotlin {
 //      @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
 //      implementation(compose.components.resources)
             implementation(isdlibs.kotlinx.dateTime)
+            implementation(isdlibs.napier.logger)
         }
 
         commonTest.dependencies {
@@ -99,6 +100,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+dependencies {
+    implementation("androidx.compose.ui:ui-tooling-preview-android:1.7.6")
 }
 
 // TODO set up publishing
