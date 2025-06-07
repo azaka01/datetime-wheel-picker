@@ -1,11 +1,14 @@
 package com.intsoftdev.datetimewheelpicker
 
 import android.app.Application
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -39,7 +42,7 @@ class AppActivity : ComponentActivity() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_UNDEFINED, showBackground = true)
 @Composable
 fun PreviewDefaultWheelDateTimePicker() {
     val startDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
@@ -49,9 +52,11 @@ fun PreviewDefaultWheelDateTimePicker() {
     val range = currentDate..endDate
 
     DateTimeWheelPicker(
+        modifier = Modifier.padding(vertical = 8.dp),
         startDateTime = startDateTime,
+        size = DpSize(256.dp, 96.dp),
         datesRange = range,
-        textStyle = MaterialTheme.typography.headlineSmall,
+        textStyle = MaterialTheme.typography.titleLarge,
         onSelectClick = {}
     ) { snappedDateTime ->
         Napier.d(tag = "App", message = "snappedDateTime $snappedDateTime")

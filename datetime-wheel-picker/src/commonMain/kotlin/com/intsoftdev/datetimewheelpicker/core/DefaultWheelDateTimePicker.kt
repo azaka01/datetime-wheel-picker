@@ -1,5 +1,6 @@
 package com.intsoftdev.datetimewheelpicker.core
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
@@ -47,9 +49,9 @@ internal fun DefaultWheelDateTimePicker(
 
     var snappedDateTime by remember { mutableStateOf(startDateTime.truncatedTo(ChronoUnit.MINUTES)) }
 
-    Column {
+    Column(modifier = modifier) {
 
-        Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Box(contentAlignment = Alignment.Center) {
             if (selectorProperties.enabled().value) {
                 Surface(
                     modifier = Modifier
@@ -232,10 +234,12 @@ internal fun DefaultWheelDateTimePicker(
             Button(
                 modifier = Modifier.align(Alignment.Bottom)
                     .size(width = 140.dp, height = 32.dp)
+                    .background(color = BlueApple, shape = RoundedCornerShape(5.dp))
+
                     .padding(top = 0.dp),
                 enabled = true, // TODO
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF4CAF50)  // Green when enabled, grey when disabled
+                    containerColor = BlueApple  // Green when enabled, grey when disabled
                 ),
                 onClick = {
                     onClick()
