@@ -1,39 +1,89 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
+    alias(isdlibs.plugins.maven.publish)
     alias(isdlibs.plugins.kotlinMultiplatform)
     alias(isdlibs.plugins.composeMultiplatform)
     alias(isdlibs.plugins.compose.compiler)
     alias(isdlibs.plugins.androidLibrary)
-    alias(isdlibs.plugins.maven.publish)
 }
 
-kotlin {
-    applyDefaultHierarchyTemplate()
+group = "com.intsoftdev"
+version = "1.0.1-SNAPSHOT"
 
-    androidTarget {
-        publishLibraryVariants("release")
+mavenPublishing {
+    // Define coordinates for the published artifact
+    coordinates(
+        groupId = "com.intsoftdev",
+        artifactId = "datetime-wheel-picker",
+        version = "1.0.1-SNAPSHOT"
+    )
 
-        compilations.all {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_17)
-                }
+    // Configure POM metadata for the published artifact
+    pom {
+        name.set("DateTime Wheel Picker")
+        description.set("Wheel Date & Time Picker in Compose Multiplatform")
+        url.set("https://github.com/azaka01/compose-datetime-wheel-picker")
+
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/licenses/MIT")
             }
+        }
+        developers {
+            developer {
+                id.set("azaka01")
+                name.set("A Zaka")
+                email.set("az@intsoftdev.com")
+            }
+        }
+        scm {
+            url.set("https://github.com/azaka01/compose-datetime-wheel-picker.git")
         }
     }
 
-    jvm()
+    // Configure publishing to Maven Central
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-    js {
-        browser()
-        binaries.executable()
+    // Enable GPG signing for all publications
+    signAllPublications()
+}
+
+kotlin {
+    jvmToolchain(17)
+}
+
+android {
+    namespace = "com.intsoftdev.datetimewheelpicker"
+    compileSdk = isdlibs.versions.compileSdk.get().toInt()
+    defaultConfig {
+        minSdk = isdlibs.versions.minSdk.get().toInt()
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
+    sourceSets["main"].apply {
+        manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        res.srcDirs("src/androidMain/resources")
+        resources.srcDirs("src/commonMain/resources")
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+kotlin {
+    androidTarget {
+        publishLibraryVariants("release")
+        @Suppress("OPT_IN_USAGE")
+        unitTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
 
     listOf(
@@ -48,16 +98,9 @@ kotlin {
     }
 
     sourceSets {
-        all {
-            languageSettings {
-//        optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
-            }
-        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.material3)
-//      @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-//      implementation(compose.components.resources)
             implementation(isdlibs.kotlinx.dateTime)
             implementation(isdlibs.napier.logger)
         }
@@ -69,45 +112,7 @@ kotlin {
         androidMain.dependencies {
         }
 
-        jvmMain.dependencies {
-        }
-
-        jsMain.dependencies {
-        }
-
-        wasmJsMain.dependencies {
-        }
-
         iosMain.dependencies {
         }
-
     }
-}
-
-android {
-    namespace = "dev.azaka01.datetimewheelpicker"
-    compileSdk = 34
-
-    defaultConfig {
-        minSdk = 21
-    }
-    sourceSets["main"].apply {
-        manifest.srcFile("src/androidMain/AndroidManifest.xml")
-        res.srcDirs("src/androidMain/resources")
-        resources.srcDirs("src/commonMain/resources")
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-dependencies {
-    implementation("androidx.compose.ui:ui-tooling-preview-android:1.7.6")
-}
-
-// TODO set up publishing
-// https://vanniktech.github.io/gradle-maven-publish-plugin/central/
-mavenPublishing {
-    publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.S01, automaticRelease = true)
-    signAllPublications()
 }
