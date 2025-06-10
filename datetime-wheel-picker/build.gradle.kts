@@ -1,108 +1,118 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
+import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
-  alias(libs.plugins.multiplatform)
-  alias(libs.plugins.compose)
-  alias(libs.plugins.compose.compiler)
-  alias(libs.plugins.android.library)
-  alias(libs.plugins.maven.publish)
+    alias(isdlibs.plugins.maven.publish)
+    alias(isdlibs.plugins.kotlinMultiplatform)
+    alias(isdlibs.plugins.composeMultiplatform)
+    alias(isdlibs.plugins.compose.compiler)
+    alias(isdlibs.plugins.androidLibrary)
+}
+
+group = "com.intsoftdev"
+version = "1.0.1-SNAPSHOT"
+
+mavenPublishing {
+    // Define coordinates for the published artifact
+    coordinates(
+        groupId = "com.intsoftdev",
+        artifactId = "datetime-wheel-picker",
+        version = "1.0.1-SNAPSHOT"
+    )
+
+    // Configure POM metadata for the published artifact
+    pom {
+        name.set("DateTime Wheel Picker")
+        description.set("Wheel Date & Time Picker in Compose Multiplatform")
+        url.set("https://github.com/azaka01/compose-datetime-wheel-picker")
+
+        licenses {
+            license {
+                name.set("MIT")
+                url.set("https://opensource.org/licenses/MIT")
+            }
+        }
+        developers {
+            developer {
+                id.set("azaka01")
+                name.set("A Zaka")
+                email.set("az@intsoftdev.com")
+            }
+        }
+        scm {
+            url.set("https://github.com/azaka01/compose-datetime-wheel-picker.git")
+        }
+    }
+
+    // Configure publishing to Maven Central
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+    // Enable GPG signing for all publications
+    signAllPublications()
 }
 
 kotlin {
-  applyDefaultHierarchyTemplate()
-
-  androidTarget {
-    publishLibraryVariants("release")
-
-    compilations.all {
-      compileTaskProvider.configure {
-        compilerOptions {
-          jvmTarget.set(JvmTarget.JVM_17)
-        }
-      }
-    }
-  }
-
-  jvm()
-
-  js {
-    browser()
-    binaries.executable()
-  }
-
-  @OptIn(ExperimentalWasmDsl::class)
-  wasmJs {
-    browser()
-  }
-
-  listOf(
-    iosX64(),
-    iosArm64(),
-    iosSimulatorArm64()
-  ).forEach {
-    it.binaries.framework {
-      baseName = "ComposeApp"
-      isStatic = true
-    }
-  }
-
-  sourceSets {
-    all {
-      languageSettings {
-//        optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
-      }
-    }
-    commonMain.dependencies {
-      implementation(compose.runtime)
-      implementation(compose.material3)
-//      @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
-//      implementation(compose.components.resources)
-      implementation(libs.kotlinx.datetime)
-    }
-
-    commonTest.dependencies {
-      implementation(kotlin("test"))
-    }
-
-    androidMain.dependencies {
-    }
-
-    jvmMain.dependencies {
-    }
-
-    jsMain.dependencies {
-    }
-
-    wasmJsMain.dependencies {
-    }
-
-    iosMain.dependencies {
-    }
-
-  }
+    jvmToolchain(17)
 }
 
 android {
-  namespace = "dev.darkokoa.datetimewheelpicker"
-  compileSdk = 34
+    namespace = "com.intsoftdev.datetimewheelpicker"
+    compileSdk = isdlibs.versions.compileSdk.get().toInt()
+    defaultConfig {
+        minSdk = isdlibs.versions.minSdk.get().toInt()
+    }
 
-  defaultConfig {
-    minSdk = 21
-  }
-  sourceSets["main"].apply {
-    manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    res.srcDirs("src/androidMain/resources")
-    resources.srcDirs("src/commonMain/resources")
-  }
-  compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
+    sourceSets["main"].apply {
+        manifest.srcFile("src/androidMain/AndroidManifest.xml")
+        res.srcDirs("src/androidMain/resources")
+        resources.srcDirs("src/commonMain/resources")
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
-mavenPublishing {
-  publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.S01, automaticRelease = true)
-  signAllPublications()
+kotlin {
+    androidTarget {
+        publishLibraryVariants("release")
+        @Suppress("OPT_IN_USAGE")
+        unitTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
+    }
+
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(compose.material3)
+            implementation(isdlibs.kotlinx.dateTime)
+            implementation(isdlibs.napier.logger)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
+        androidMain.dependencies {
+        }
+
+        iosMain.dependencies {
+        }
+    }
 }

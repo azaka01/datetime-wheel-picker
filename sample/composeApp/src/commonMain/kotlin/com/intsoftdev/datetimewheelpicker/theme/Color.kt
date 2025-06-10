@@ -1,4 +1,4 @@
-package dev.darkokoa.datetimewheelpicker.theme
+package com.intsoftdev.datetimewheelpicker.theme
 
 import androidx.compose.ui.graphics.Color
 

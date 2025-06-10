@@ -1,8 +1,9 @@
 plugins {
-  alias(libs.plugins.multiplatform).apply(false)
-  alias(libs.plugins.compose).apply(false)
-  alias(libs.plugins.compose.compiler).apply(false)
-  alias(libs.plugins.android.application).apply(false)
-  alias(libs.plugins.android.library).apply(false)
-  alias(libs.plugins.maven.publish).apply(false)
+  alias(isdlibs.plugins.gradleVersions)
+  alias(isdlibs.plugins.kotlin.android) apply false
+  alias(isdlibs.plugins.kotlinMultiplatform) apply false
+  alias(isdlibs.plugins.composeMultiplatform) apply false
+  alias(isdlibs.plugins.compose.compiler) apply false
+  alias(isdlibs.plugins.androidApplication) apply false
+  alias(isdlibs.plugins.androidLibrary) apply false
 }
