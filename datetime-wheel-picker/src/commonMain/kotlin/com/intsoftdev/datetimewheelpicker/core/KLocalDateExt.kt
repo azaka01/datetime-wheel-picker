@@ -1,12 +1,14 @@
 package com.intsoftdev.datetimewheelpicker.core
 
-import kotlinx.datetime.Clock
+import kotlin.math.min
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlin.math.min
 import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.toLocalDateTime
 
+@OptIn(ExperimentalTime::class)
 internal fun LocalDate.Companion.now(timeZone: TimeZone = TimeZone.currentSystemDefault()): LocalDate {
     return Clock.System.now().toLocalDateTime(timeZone).date
 }
@@ -76,7 +78,7 @@ fun LocalDate.isAfter(other: LocalDate): Boolean {
 }
 
 fun LocalDate.toDayOfWeekText(): String {
-    return when(this.dayOfWeek.isoDayNumber) {
+    return when (this.dayOfWeek.isoDayNumber) {
         1 -> "Mon"
         2 -> "Tue"
         3 -> "Wed"
