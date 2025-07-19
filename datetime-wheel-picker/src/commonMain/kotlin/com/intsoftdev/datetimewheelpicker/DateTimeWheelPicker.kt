@@ -12,12 +12,14 @@ import com.intsoftdev.datetimewheelpicker.core.DefaultWheelDateTimePicker
 import com.intsoftdev.datetimewheelpicker.core.SelectorProperties
 import com.intsoftdev.datetimewheelpicker.core.TimeFormat
 import com.intsoftdev.datetimewheelpicker.core.WheelPickerDefaults
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
+@OptIn(ExperimentalTime::class)
 @Composable
 fun DateTimeWheelPicker(
     modifier: Modifier = Modifier,

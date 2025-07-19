@@ -10,14 +10,14 @@ plugins {
 }
 
 group = "com.intsoftdev"
-version = "1.0.1-SNAPSHOT"
+version = "1.0.2"
 
 mavenPublishing {
     // Define coordinates for the published artifact
     coordinates(
-        groupId = "com.intsoftdev",
+        groupId = group.toString(),
         artifactId = "datetime-wheel-picker",
-        version = "1.0.1-SNAPSHOT"
+        version = version.toString()
     )
 
     // Configure POM metadata for the published artifact

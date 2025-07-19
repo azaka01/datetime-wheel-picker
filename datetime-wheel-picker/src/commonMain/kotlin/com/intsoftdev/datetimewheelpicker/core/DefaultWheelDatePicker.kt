@@ -18,7 +18,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.aakira.napier.Napier
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
@@ -148,6 +149,7 @@ fun LocalDate.toDisplayable(): String {
         .replaceFirstChar { char -> char.titlecase() }.subSequence(0, 3)
 }
 
+@OptIn(ExperimentalTime::class)
 internal fun getDatesAroundCurrent(datesRange: ClosedRange<LocalDate>): List<DateSelectionElement> {
 
     val currentDate: LocalDate =
