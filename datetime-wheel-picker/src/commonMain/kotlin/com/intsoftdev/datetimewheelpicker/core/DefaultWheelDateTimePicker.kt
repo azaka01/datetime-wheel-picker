@@ -32,6 +32,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.number
 
+private const val isLoggingEnabled = false
+
 @Composable
 internal fun DefaultWheelDateTimePicker(
     modifier: Modifier = Modifier,
@@ -44,7 +46,7 @@ internal fun DefaultWheelDateTimePicker(
     textColor: Color = LocalContentColor.current,
     selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
     onClick: () -> Unit,
-    onSnappedDateTime: (snappedDateTime: SnappedDateTime) -> Int? = { _ -> null }
+    onSnappedDateTime: (snappedDateTime: SnappedDateTime) -> Int? = { _ -> null },
 ) {
 
     var snappedDateTime by remember { mutableStateOf(startDateTime.truncatedTo(ChronoUnit.MINUTES)) }
@@ -77,10 +79,12 @@ internal fun DefaultWheelDateTimePicker(
                         enabled = false
                     ),
                     onSnappedDate = { snappedDate ->
-                        Napier.d(
-                            tag = "DefaultWheelDateTimePicker",
-                            message = "Date: onSnappedDate: $snappedDate"
-                        )
+                        if (isLoggingEnabled) {
+                            Napier.d(
+                                tag = "DefaultWheelDateTimePicker",
+                                message = "Date: onSnappedDate: $snappedDate"
+                            )
+                        }
                         val newDateTime = when (snappedDate) {
 
                             is SnappedDate.NewDate -> {
@@ -88,40 +92,48 @@ internal fun DefaultWheelDateTimePicker(
                             }
 
                             is SnappedDate.DayOfMonth -> {
-                                snappedDateTime.withDayOfMonth(snappedDate.snappedLocalDate.dayOfMonth)
+                                snappedDateTime.withDayOfMonth(snappedDate.snappedLocalDate.day)
                             }
 
                             is SnappedDate.Month -> {
-                                snappedDateTime.withMonthNumber(snappedDate.snappedLocalDate.monthNumber)
+                                snappedDateTime.withMonthNumber(snappedDate.snappedLocalDate.month.number)
                             }
                         }
 
-                        Napier.d(
-                            tag = "DefaultWheelDateTimePicker",
-                            message = "newDateTime: $newDateTime"
-                        )
+                        if (isLoggingEnabled) {
+                            Napier.d(
+                                tag = "DefaultWheelDateTimePicker",
+                                message = "newDateTime: $newDateTime"
+                            )
+                        }
 
                         if (newDateTime.date in datesRange) {
                             snappedDateTime = newDateTime
-                            Napier.d(
-                                tag = "DefaultWheelDateTimePicker",
-                                message = "In Range snappedDateTime: $newDateTime"
-                            )
+                            if (isLoggingEnabled) {
+                                Napier.d(
+                                    tag = "DefaultWheelDateTimePicker",
+                                    message = "In Range snappedDateTime: $newDateTime"
+                                )
+                            }
                         } else {
-                            Napier.d(
-                                tag = "DefaultWheelDateTimePicker",
-                                message = "OUTSIDE RANGE use current $snappedDateTime"
-                            )
+                            if (isLoggingEnabled) {
+                                Napier.d(
+                                    tag = "DefaultWheelDateTimePicker",
+                                    message = "OUTSIDE RANGE use current $snappedDateTime"
+                                )
+                            }
                         }
 
                         return@DefaultWheelDatePicker when (snappedDate) {
 
                             is SnappedDate.NewDate -> {
-                                Napier.d(
-                                    tag = "DefaultWheelDateTimePicker",
-                                    message = "return NewDate"
-                                )
-                                var daysToDisplay = getDatesAroundCurrent(datesRange)
+                                if (isLoggingEnabled) {
+                                    Napier.d(
+                                        tag = "DefaultWheelDateTimePicker",
+                                        message = "return NewDate"
+                                    )
+                                }
+                                val daysToDisplay = getDatesAroundCurrent(datesRange)
                                 val index =
                                     daysToDisplay.find { it.localDate == snappedDateTime.date }?.index
                                         ?: 0
@@ -135,17 +147,19 @@ internal fun DefaultWheelDateTimePicker(
                             }
 
                             is SnappedDate.DayOfMonth -> {
-                                Napier.d(
-                                    tag = "DefaultWheelDateTimePicker",
-                                    message = "return DayOfMonth"
-                                )
+                                if (isLoggingEnabled) {
+                                    Napier.d(
+                                        tag = "DefaultWheelDateTimePicker",
+                                        message = "return DayOfMonth"
+                                    )
+                                }
                                 onSnappedDateTime(
                                     SnappedDateTime.DayOfMonth(
                                         snappedDateTime,
-                                        snappedDateTime.dayOfMonth - 1
+                                        snappedDateTime.day - 1
                                     )
                                 )
-                                snappedDateTime.dayOfMonth - 1
+                                snappedDateTime.day - 1
                             }
 
                             is SnappedDate.Month -> {
@@ -175,10 +189,12 @@ internal fun DefaultWheelDateTimePicker(
                         enabled = false
                     ),
                     onSnappedTime = { snappedTime, timeFormat ->
-                        Napier.d(
-                            tag = "DefaultWheelDateTimePicker",
-                            message = "snappedTime hour: ${snappedTime.snappedLocalTime.hour}"
-                        )
+                        if (isLoggingEnabled) {
+                            Napier.d(
+                                tag = "DefaultWheelDateTimePicker",
+                                message = "snappedTime hour: ${snappedTime.snappedLocalTime.hour}"
+                            )
+                        }
                         val newDateTime = when (snappedTime) {
                             is SnappedTime.Hour -> {
                                 snappedDateTime.withHour(snappedTime.snappedLocalTime.hour)
@@ -191,16 +207,19 @@ internal fun DefaultWheelDateTimePicker(
 
                         if (newDateTime.date in datesRange) {
                             snappedDateTime = newDateTime
-                            Napier.d(
-                                tag = "DefaultWheelDateTimePicker",
-                                message = "new datetime IN RANGE $snappedDateTime"
-                            )
-
+                            if (isLoggingEnabled) {
+                                Napier.d(
+                                    tag = "DefaultWheelDateTimePicker",
+                                    message = "new datetime IN RANGE $snappedDateTime"
+                                )
+                            }
                         } else {
-                            Napier.d(
-                                tag = "DefaultWheelDateTimePicker",
-                                message = "IGNORE new datetime out of range"
-                            )
+                            if (isLoggingEnabled) {
+                                Napier.d(
+                                    tag = "DefaultWheelDateTimePicker",
+                                    message = "IGNORE new datetime out of range"
+                                )
+                            }
                         }
 
                         return@DefaultWheelTimePicker when (snappedTime) {
