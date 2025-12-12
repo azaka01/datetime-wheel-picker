@@ -23,3 +23,4 @@ Pods/
 *.gpg
 /.kotlin
 /gradle.properties
+secrets.properties

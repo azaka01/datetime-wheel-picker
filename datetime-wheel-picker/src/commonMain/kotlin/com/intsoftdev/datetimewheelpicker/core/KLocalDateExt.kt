@@ -6,6 +6,7 @@ import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
+import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
 
 @OptIn(ExperimentalTime::class)
@@ -24,18 +25,18 @@ internal val LocalDate.isLeapYear: Boolean
     get() = isLeapYear(year)
 
 internal fun LocalDate.withDayOfMonth(dayOfMonth: Int): LocalDate {
-    return if (this.dayOfMonth == dayOfMonth) {
+    return if (day == dayOfMonth) {
         this
     } else {
-        LocalDate(year, monthNumber, dayOfMonth)
+        LocalDate(year, month.number, dayOfMonth)
     }
 }
 
 internal fun LocalDate.withMonthNumber(monthNumber: Int): LocalDate {
-    return if (this.monthNumber == monthNumber) {
+    return if (month.number == monthNumber) {
         this
     } else {
-        resolvePreviousValid(year, monthNumber, dayOfMonth)
+        resolvePreviousValid(year, monthNumber, day)
     }
 }
 
@@ -43,7 +44,7 @@ internal fun LocalDate.withYear(year: Int): LocalDate {
     return if (this.year == year) {
         this
     } else {
-        resolvePreviousValid(year, monthNumber, dayOfMonth)
+        resolvePreviousValid(year, month.number, day)
     }
 }
 

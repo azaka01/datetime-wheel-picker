@@ -145,7 +145,7 @@ internal data class DateSelectionElement(
 )
 
 fun LocalDate.toDisplayable(): String {
-    return this.toDayOfWeekText() + " " + "${this.dayOfMonth}" + " " + this.month.name.lowercase()
+    return this.toDayOfWeekText() + " " + "$day" + " " + this.month.name.lowercase()
         .replaceFirstChar { char -> char.titlecase() }.subSequence(0, 3)
 }
 
